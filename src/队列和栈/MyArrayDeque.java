@@ -2,6 +2,7 @@ package 队列和栈;
 
 /**
  * 底层用数组，运用环形数组技巧实现双端队列
+ * <p>Dequeue stands for Double Ended Queue</p>
  *
  * @param <E>
  */
@@ -131,6 +132,7 @@ public class MyArrayDeque<E> {
         //  ---last first--  （绝大部分情况）
         for (int i = 0; i < size; i++) {
             newData[i] = data[(first + i) % data.length]; //使用取模运算保证索引不越界
+            // 求模运算的效率其实不高，进一步优化可以查看RingBuffer中的位运算实现
         }
         data = newData;
         first = 0; // 注意新数组时从0开始copy的，所以需要重置first
