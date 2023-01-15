@@ -18,6 +18,7 @@ public class RingBuffer {
      * 记录可以读取的字节个数
      */
     private int size;
+
     public RingBuffer() {
         this(INIT_CAP);
     }
@@ -26,7 +27,7 @@ public class RingBuffer {
         // 将输入的 cap 变成 2 的指数
         cap = ceilToPowerOfTwo(cap);
         mask = cap - 1;
-        // mask的作用：
+        // mask的作用：用于简化之后的取模运算。 (之后指针越界后需要进行mod运算重新确定索引)
         // 如果保证 capacity 是 2 的指数，
         // 那么(i + n) % capacity 这一mod运算 就等价于 (i + n) & mask (2进制的与运算)
 
