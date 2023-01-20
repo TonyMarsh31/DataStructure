@@ -147,6 +147,8 @@ public class MyHashMap2<K, V> {
      */
     private int getNodeIndex(K key) {
         int hash = myHash(key);
+        // hashMap在put和remove的时候都会检查是否要resize 以确保HashMap不被填满，即至少会有1个null空位
+        // 所以这个while循环是安全的，不会出现死循环
         while (table[hash] != null) {
             if (table[hash].key.equals(key)) {
                 return hash;
