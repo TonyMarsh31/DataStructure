@@ -1,25 +1,30 @@
-package HashMap.线性探查法;
+package 哈希.HashMap.线性探查法;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 使用线性探查法处理哈希冲突的 HashMap
+ * 使用线性探查法处理哈希冲突的 哈希.HashMap
+ * <p>与MyHashMap2的不同:用占位符标记完成删除操作，这样就不用每一次删除时都要rehash了</p>
+ * <p>rehash的频率从每remove操作发生时进行一次，降低为每resize操作发生时进行一次</p>
+ * <P> 修改的地方：getNodeIndex | put | remove | resize</P>
  */
-public class MyHashMap2<K, V> {
+public class MyHashMap3<K, V> {
     private static final int INIT_CAP = 16;
     private static final float LOAD_FACTOR = 0.75f;
+    private final Node<K, V> DUMMY = new Node<>(null, null); // 占位符，用于标记删除
     // 拉链法中的HashTable是一个SLot数组，slot是一个存储node的单链表
     // 而在线性探查法中，HashTable是一个直接存储Node的数组
     private Node<K, V>[] table;
     private int size;
     private int cap;
-    public MyHashMap2() {
+
+    public MyHashMap3() {
         this(INIT_CAP);
     }
 
-    public MyHashMap2(int initCap) {
+    public MyHashMap3(int initCap) {
         size = 0;
         cap = initCap;
         table = (Node<K, V>[]) new Node[initCap];
@@ -42,7 +47,7 @@ public class MyHashMap2<K, V> {
         }
         // key不存在，插入新节点
         index = myHash(key);
-        while (table[index] != null) { // 线性探查法,找一个空Node插入
+        while (table[index] != null && table[index] != DUMMY) { // 线性探查法,找一个空Node插入
             index = (index + 1) % cap; // 在方法体前段已经ensureCapacity，所以必定会找到空Node
         }
         table[index] = new Node<>(key, val);
@@ -65,21 +70,8 @@ public class MyHashMap2<K, V> {
             return null;
         }
         Node<K, V> deletedEntry = table[index];
-        table[index] = null;
+        table[index] = DUMMY;
         size--;
-
-        // 在线性探查法的实现中，进行删除操作后，后面(直至下一个空节点)的元素需要向前移动(rehash),以保证哈希表的连续性
-        // 这是因为在getNodeIndex中，遍历的终止条件是table[index] == null，如果不执行上述操作，那么可能会导致提前进入终止条件从而忽略之后的元素
-        index = (index + 1) % cap;
-        while (table[index] != null) {
-            // rehash
-            Node<K, V> entry = table[index];
-            table[index] = null;
-            size--;
-            put(entry.key, entry.val); // 重新插入,size会自增回来
-            index = (index + 1) % cap;
-        }
-
         return deletedEntry.val;
     }
 
@@ -146,14 +138,22 @@ public class MyHashMap2<K, V> {
      * 获取key在HashTable中的index，使用线性探查法解决哈希冲突
      */
     private int getNodeIndex(K key) {
-        int hash = myHash(key);
-        // hashMap在put和remove的时候都会检查是否要resize 以确保HashMap不被填满，即至少会有1个null空位
-        // 所以这个while循环是安全的，不会出现死循环
-        while (table[hash] != null) {
-            if (table[hash].key.equals(key)) {
-                return hash;
-            }
-            hash = (hash + 1) % cap;
+        int i = myHash(key);
+        /*
+         hashMap在put和remove的时候都会结合负载因子检查是否要resize 以确保HashMap不被填满
+         但是在本类的实现中，由于dummy的存在，可能还是会出现HashTable被填满的情况 
+         例如在数据量size适中的时候，此时put和remove不触发resize,
+         之后又不断交替触发put和remove, size变化很小，仍然不触发resize，但不断有dummy节点被插入，最终导致HashTable被填满
+         遍历一个不存在nullNode的HashTable，会出现死循环
+         所以补充一个step变量记录遍历次数，超过size后退出循环，以此避免死循环
+        */
+        int step = 0;
+        while (table[i] != null) {
+            if (table[i] == DUMMY) continue; //跳过占位符 //? 这一步是必要的吗 
+            if (table[i].key.equals(key)) return i;
+            i = (i + 1) % cap;
+            step++;
+            if (step == size) return -1;
         }
         return -1;
     }
@@ -171,9 +171,9 @@ public class MyHashMap2<K, V> {
      * 实际的扩容操作
      */
     private void resize(int newCap) {
-        MyHashMap2<K, V> newMap = new MyHashMap2<>(newCap);
+        MyHashMap3<K, V> newMap = new MyHashMap3<>(newCap);
         for (Node<K, V> entry : table) {
-            if (entry != null) {
+            if (entry != null && entry != DUMMY) {
                 newMap.put(entry.key, entry.val);
             }
         }

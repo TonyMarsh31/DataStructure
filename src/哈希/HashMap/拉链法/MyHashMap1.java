@@ -1,9 +1,9 @@
-package HashMap.拉链法;
+package 哈希.HashMap.拉链法;
 
 import java.util.Map;
 
 /**
- * 使用拉链思路处理哈希冲突的 HashMap
+ * 使用拉链思路处理哈希冲突的 哈希.HashMap
  * 主要的部分就是用myHash(key) 计算对应的Slot，剩下的就是用Slot的API来进行CRUD了
  * 难点在于hash与rehash的设计，这方面有很多优化的空间，但这里仅仅是一个简单的实现用于阐释思路，所以不多展开了
  */

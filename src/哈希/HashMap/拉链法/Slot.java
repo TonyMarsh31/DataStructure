@@ -1,4 +1,4 @@
-package HashMap.拉链法;
+package 哈希.HashMap.拉链法;
 
 import java.util.ArrayList;
 import java.util.List;
