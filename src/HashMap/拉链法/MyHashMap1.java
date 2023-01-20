@@ -1,4 +1,4 @@
-package HashMap;
+package HashMap.拉链法;
 
 import java.util.Map;
 
