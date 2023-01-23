@@ -1,5 +1,6 @@
 package 哈希.HashMap.拉链法;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -86,6 +87,14 @@ public class MyHashMap1<K, V> {
         }
         Slot<K, V> slot = table[myHash(key)];
         return slot.containKey(key);
+    }
+
+    public Iterable<K> keys() {
+        ArrayList<K> keyList = new ArrayList<>();
+        for (Slot<K, V> slot : table) {
+            keyList.addAll(slot.keys());
+        }
+        return keyList;
     }
 
     /**
