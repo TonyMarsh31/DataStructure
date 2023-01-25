@@ -10,7 +10,9 @@ import java.util.Objects;
  * <p>所以为实现该特性，一种思路是额外封装一个LinkedList用于顺序保存key :见图示1</p>
  * <p>这样在CRUD操作中，读和修改操作没有影响，直接用原来的Map API. 而在新增和删除中 需要额外的对保存key的List做一些维护,
  * 在链表中，新增(到最后)的时间复杂度是常量级的,而根据index删除需要遍历链表造成额外耗时</p>
- * <p>在本实现中，我们依据上述思路但是更进一步: 图示2,将原先只保存key的LinkedList改为存储entry.而map的value存储entry(node)的引用</p
+ * <p><u>在本实现(与接下来所有HashMap与其他数据结构的结合)中，我们要做一个思想上的转变:我们不再将Map作为一个直接用于存储的"容器"，
+ * 而是将其直接作为抽象使用，也就是key到value的映射，此时value不是直接的数据，而可以是其他数据结构的引用</u></p>
+ * <p>如图示2,将原先只保存key的LinkedList改为存储entry.而map的value存储entry(node)的引用</p
  * <p>即我们使用LinkedList存储entry,这样就保证了key的顺序，同时使用map来做key和entry的映射来实现随机访问</p>
  * <p>或者换句话说，我们将Map中的Value由直接的entry.value 包装为一个链表节点node，node中额外的前后指针为entry保存了顺序 </p>
  * <p>最终，我们CRUD操作的时间复杂度就仍然是常数级别:见图3</p>
@@ -18,6 +20,21 @@ import java.util.Objects;
 public class MyLinkedHashMap<K, V> {
 
     //region 数据结构
+
+    /**
+     * 链表的节点，保存key和value与前后节点的引用
+     */
+    private static class Node<K, V> {
+        K key;
+        V val;
+        Node<K, V> prev, next;
+
+        Node(K key, V val) {
+            this.key = key;
+            this.val = val;
+        }
+    }
+
     private final Node<K, V> head, tail; //链表头尾节点
     private final HashMap<K, Node<K, V>> map = new HashMap<>(); //底部的HashMap
 
@@ -103,18 +120,5 @@ public class MyLinkedHashMap<K, V> {
         node.next.prev = node.prev;
     }
 
-    /**
-     * 链表的节点，保存key和value与前后节点的引用
-     */
-    private static class Node<K, V> {
-        K key;
-        V val;
-        Node<K, V> prev, next;
-
-        public Node(K key, V val) {
-            this.key = key;
-            this.val = val;
-        }
-    }
     //endregion
 }
