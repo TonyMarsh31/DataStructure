@@ -17,8 +17,7 @@ import java.util.Objects;
  */
 public class MyLinkedHashMap<K, V> {
 
-    //region 数据结构部分
-
+    //region 数据结构
     private final Node<K, V> head, tail; //链表头尾节点
     private final HashMap<K, Node<K, V>> map = new HashMap<>(); //底部的HashMap
 
@@ -31,15 +30,15 @@ public class MyLinkedHashMap<K, V> {
         head.next = tail;
         tail.prev = head;
     }
+    //endregion
 
-    //region CRUD
+    //region Map标准API
     public V get(K key) {
         Objects.requireNonNull(key);
         Node<K, V> entry = map.get(key);
         return entry == null ? null : entry.val;
     }
 
-    //endregion[
 
     public V put(K key, V val) {
         Objects.requireNonNull(key);
@@ -70,6 +69,11 @@ public class MyLinkedHashMap<K, V> {
         }
     }
 
+    public boolean containsKey(K key) {
+        return map.containsKey(key);
+    }
+    //endregion
+
     //region 顺序遍历所有key的实现
     // 注：新特性是指返回的keys是有序的(插入顺序),之前MyHashMap1中的keys返回的是无序的key集合
     public Iterable<K> keys() {
@@ -93,7 +97,6 @@ public class MyLinkedHashMap<K, V> {
         tail.prev = node;
         // lastNode <-> node <-> tail
     }
-    //endregion
 
     private void removeNode(Node<K, V> node) {
         node.prev.next = node.next;
