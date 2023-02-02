@@ -2,7 +2,7 @@ package BST.TreeMap;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.NoSuchElementException;
+import java.util.LinkedList;
 import java.util.Objects;
 
 public class MyTreeMap<K extends Comparable<K>, V> {
@@ -172,7 +172,7 @@ public class MyTreeMap<K extends Comparable<K>, V> {
 
     private TreeNode get(TreeNode node, K key) {
         if (node == null) {
-            return null;
+            return null; // base case 1: 没找到返回null
         }
 
         int cmp = key.compareTo(node.key);
@@ -181,18 +181,136 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         } else if (cmp > 0) { // key > node.key
             return get(node.right, key);
         } else { // key == node.key
-            return node;
+            return node; //base case 2: 找到了返回node
+        }
+    }
+
+
+/*
+    floor 和 celling 的实现思路就类似于get方法的思路
+    最优情况下是key存在于树中，此时floor和celling就是key本身,代码逻辑就是get的逻辑
+    而关键就在于当找不到key的时候，此时不返回null，而是返回当前正在递归访问的node，该node就是floor或者celling
+*/
+
+    /**
+     * 返回最接近且小于等于key的key
+     *
+     * @param key key
+     * @return 最接近且小于等于key的节点的key
+     */
+    public K floorKey(K key) {
+        Objects.requireNonNull(key);
+        TreeNode x = floorNode(root, key);
+        return x == null ? null : x.key;
+    }
+
+    /**
+     * 返回最接近且小于等于key的节点
+     *
+     * @param node 当前节点
+     * @param key  key
+     * @return 最接近且小于等于key的节点
+     */
+    private TreeNode floorNode(TreeNode node, K key) {
+        if (node == null) {
+            return null; //
+        }
+        int cmp = key.compareTo(node.key);
+        if (cmp < 0) { // key < node.key
+            // 当前节点仍然大于key,继续递归
+            return floorNode(node.left, key); //若最终递归完毕返回null，则说明最小的节点仍大于key，不存在floor节点
+        }
+        if (cmp > 0) { // key > node.key
+            TreeNode t = floorNode(node.right, key);
+            // 当前节点已经小于key,可能是floor节点
+            // 如果右子树中仍存在节点，则继续递归
+            // 否则便说明，该节点就是floor节点
+            return t == null ? node : t;
+        } else {
+            return node; //最优情况，key存在于树中，此时的floor就是他自己
         }
     }
 
     /**
-     * 获得二分搜索树中最小的键值
+     * 返回最接近且大于等于key的key
      *
-     * @return 二分搜索树中最小的键值
+     * @param key key
+     * @return 最接近且大于等于key的节点的key
      */
-    public V getMin() {
-        if (isEmpty()) throw new NoSuchElementException("BST is empty");
-        return minNode(root).val;
+    public K cellingKey(K key) {
+        Objects.requireNonNull(key);
+        TreeNode x = cellingNode(root, key);
+        return x == null ? null : x.key;
+    }
+
+    /**
+     * 返回最接近且大于等于key的节点
+     *
+     * @param node 当前节点
+     * @param key  key
+     * @return 最接近且大于等于key的节点
+     */
+    private TreeNode cellingNode(TreeNode node, K key) {
+        if (node == null) {
+            return null;
+        }
+        int cmp = key.compareTo(node.key);
+        if (cmp > 0) { // key > node.key
+            // 当前节点仍然小于key,继续递归
+            return cellingNode(node.right, key); //若最终递归完毕返回null，则说明最大的节点仍小于key，不存在celling节点
+        }
+        if (cmp < 0) { // key < node.key
+            TreeNode t = cellingNode(node.left, key);
+            // 当前节点已经大于key,可能是celling节点
+            // 如果左子树中仍存在节点，则继续递归
+            // 否则便说明，该节点就是celling节点
+            return t == null ? node : t;
+        } else {
+            return node; //最优情况，key存在于树中，此时的celling就是他自己
+        }
+    }
+
+    /**
+     * 从小到大返回二分搜索树中所有的key
+     *
+     * @return 二分搜索树中所有的key
+     */
+    public Iterable<K> keys() {
+        LinkedList<K> keys = new LinkedList<>();
+        traverse(root, keys);
+        return keys;
+    }
+
+    /**
+     * 从小到大返回二分搜索树中指定范围内的key
+     *
+     * @param min 最小阈值
+     * @param max 最大阈值
+     * @return 指定范围内的key
+     */
+    public Iterable<K> keys(K min, K max) {
+        LinkedList<K> keys = new LinkedList<>();
+        traverse(root, keys, min, max);
+        return keys;
+    }
+
+
+    /**
+     * 返回二分搜索树中最小的key
+     *
+     * @return 二分搜索树中最小的key
+     */
+    public K minKey() {
+        return minNode(root).key;
+    }
+
+    /**
+     * 返回二分搜索树中最大的key
+     *
+     * @return 二分搜索树中最大的key
+     */
+    public K maxKey() {
+        return maxNode(root).key;
     }
 
     /**
@@ -208,6 +326,12 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         return minNode(node.left);
     }
 
+    /**
+     * 返回以node为根的二分搜索树的最大值所在的节点
+     *
+     * @param node 二分搜索树的根
+     * @return 以node为根的二分搜索树的最大值所在的节点
+     */
     private TreeNode maxNode(TreeNode node) {
         if (node.right == null) {
             return node;
@@ -229,5 +353,61 @@ public class MyTreeMap<K extends Comparable<K>, V> {
 
         return size == 0;
     }
+
+    /**
+     * 二分搜索树keys的中序遍历
+     *
+     * @param node 根节点
+     * @param list 保存遍历结果 ,在BST中，中序遍历的结果就是从小到大的顺序
+     */
+    private void traverse(TreeNode node, LinkedList<K> list) {
+        if (node == null) {
+            return;
+        }
+        traverse(node.left, list);
+        list.add(node.key);
+        traverse(node.right, list);
+    }
+
+    /**
+     * 二分搜索树指定部分的中序遍历
+     *
+     * @param node 根节点
+     * @param list 保存遍历结果
+     * @param min  最小阈值
+     * @param max  最大阈值
+     */
+    private void traverse(TreeNode node, LinkedList<K> list, K min, K max) {
+        if (node == null) {
+            return;
+        }
+        int cmpMin = min.compareTo(node.key);
+        int cmpMax = max.compareTo(node.key);
+
+/*
+        在下面这种实现中，还是进行中序遍历，只是只有当节点的key在[min,max]范围内时，才将其加入到keys中
+
+        traverse(node.left, keys);
+        if (cmpMin <= 0 && cmpMax >= 0) {
+            keys.add(node.key);
+        }
+        traverse(node.right, keys);
+
+        这样做虽然可以，但毕竟还是遍历了整棵树，效率并不高
+        其实只要当min > node时，就不需要再遍历node的左子树了，因为左子树中的所有节点只会比node更小
+        max也是同理,所以代码可以优化为下面这种形式
+*/
+        // 其实就是在中序遍历的基础上进一步加一些条件判断，减少非必要的递归，避免遍历整棵树
+        if (cmpMin < 0) { // min < node.key , 如果这个条件都不满足，那么就不需要再遍历node的左子树了，因为左子树中的所有节点只会比node更小
+            traverse(node.left, list, min, max);
+        }
+        if (cmpMin <= 0 && cmpMax >= 0) {
+            list.add(node.key);
+        }
+        if (cmpMax > 0) { // max > node.key
+            traverse(node.right, list, min, max);
+        }
+    }
+
     //endregion
 }
