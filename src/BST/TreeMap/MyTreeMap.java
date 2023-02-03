@@ -488,5 +488,37 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         }
     }
 
-    //endregion
+    /**
+     * 校验二分搜索树
+     *
+     * @param root 二分搜索树的根节点
+     * @return 是否是二分搜索树
+     */
+    public boolean isValidBST(TreeNode root) {
+        /*
+         一种直接的方法是中序遍历，然后判断遍历结果是否是升序的,但是这种方法需要遍历完整个树后才能有结果
+         我们可以在遍历的过程中，直接对每一个节点进行判断，如果发现不满足条件，就可以直接返回false了
+         这样如果不是二分搜索树，就可以提前结束遍历，节省时间
+        */
+        return isValidBST(root, null, null);
+    }
+
+    private boolean isValidBST(TreeNode node, K low, K high) {
+        if (node == null) return true;
+
+        //如果有任意一个节点不满足条件，那么就不是二分搜索树
+        if (low != null && low.compareTo(node.key) > 0) return false;
+        if (high != null && high.compareTo(node.key) < 0) return false;
+
+        //递归迭代整个树 , 递归的过程中，不断更新low和high的值，左子树更新high，右子树更新low
+        return isValidBST(node.left, low, node.key) && isValidBST(node.right, node.key, high);
+/*
+        上面这行代码是简写的形式，用if条件判断表示是下面的形式
+        if (!isValidBST(root.left, low, root.key)) return false;
+        if (!isValidBST(root.right, root.key, high)) return false;
+        return true;
+*/
+    }
+
+//endregion
 }
