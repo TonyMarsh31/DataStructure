@@ -10,20 +10,97 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         K key;
         V val;
         TreeNode left, right;
+        int size; //记录以该节点为根的子树节点的个数(包含自己)
 
         TreeNode(K key, V val) {
             this.key = key;
             this.val = val;
             left = right = null;
+            this.size = 1;
         }
     }
 
     private TreeNode root = null;
-    private int size = 0;
 
     public MyTreeMap() {
     }
 
+    //region 扩展
+
+/*
+    这一部分的方法不在BST的标准API范围内，但是在实际应用中很有用，一些LeetCode的题目也会用到这些方法
+    为了高效地实现这些方法，我们需要对BST进行一些改造，使得BST的节点中存储一些额外的信息，例如：
+    1. 节点的高度
+    2. 节点的子树节点的个数
+*/
+
+
+    /**
+     * 返回小于key的键的个数
+     *
+     * @param key key
+     * @return 小于key的键的个数
+     */
+    public int rank(K key) {
+        Objects.requireNonNull(key);
+        return rank(root, key);
+    }
+
+    /**
+     * 返回以node为根的二分搜索树中小于key的键的个数
+     *
+     * @param node 二分搜索树的根
+     * @param key  key
+     * @return 小于key的键的个数
+     */
+    private int rank(TreeNode node, K key) {
+        // 其实就是计算key节点左子树节点的个数
+        int cmp = key.compareTo(node.key);
+        if (cmp < 0) { // key < node.key
+            return rank(node.left, key); //左子树继续迭代
+        } else if (cmp > 0) { // key > node.key
+            return 1 + size(node.left) + rank(node.right, key); //该节点+左子树节点个数+右子树继续迭代
+        } else { // key == node.key
+            return size(node.left); //最优情况key存在，直接返回key节点左子树节点个数
+        }
+    }
+
+    /**
+     * 返回索引为i的键，注意索引从0开始计算。
+     * <p>由于BST的有序性，可以将其中序遍历的结果看作是一个有序数组，这样就可以通过索引来访问BST中的元素</p>
+     * <p>可以将select函数理解为rank函数的镜像，rank将key映射为index，select将index映射为key</p>
+     *
+     * @param i 索引 | 排名
+     * @return 索引为i的键
+     */
+    public K select(int i) {
+        if (i < 0 || i >= size()) {
+            throw new IllegalArgumentException("索引越界");
+        }
+        return select(root, i).key;
+    }
+
+    /**
+     * 返回以node为根的二分搜索树中索引为i的节点
+     *
+     * @param node 二分搜索树的根
+     * @param i    索引
+     * @return 索引为i的节点
+     */
+    private TreeNode select(TreeNode node, int i) {
+        int currentIndex = size(node.left);
+        if (i < currentIndex) {
+            return select(node.left, i); //左子树继续迭代
+        } else if (i > currentIndex) {
+            return select(node.right, i - currentIndex - 1);
+            //右子树继续迭代，根节点发生了变化, 为保持逻辑一致，新的index应当是i减去左子树节点个数和当前节点
+        } else {
+            return node; //找到了
+        }
+    }
+
+
+    //endregion
 
     //region 增 改
     public V put(K key, V val) {
@@ -35,7 +112,6 @@ public class MyTreeMap<K extends Comparable<K>, V> {
 
     private @NotNull TreeNode put(TreeNode node, K key, V val) {
         if (node == null) { // 递归到底，没有找到key，执行新增操作
-            size++;
             return new TreeNode(key, val);
         }
         int cmp = key.compareTo(node.key);
@@ -46,6 +122,7 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         } else { // key == node.key
             node.val = val; // 更新值
         }
+        node.size = size(node.left) + size(node.right) + 1;
         return node;
     }
 
@@ -60,7 +137,6 @@ public class MyTreeMap<K extends Comparable<K>, V> {
      */
     public void removeMin() {
         root = removeMin(root);
-        size--;
     }
 
     /**
@@ -73,26 +149,27 @@ public class MyTreeMap<K extends Comparable<K>, V> {
         if (node.left == null) { // 找到最小节点
             TreeNode rightNode = node.right; // 注意不要直接返回null，因为可能存在右子树
             node.right = null;
-            size--;
             return rightNode;
         }
         node.left = removeMin(node.left);
+        // 维护每个Node的size
+        node.size = size(node.left) + size(node.right) + 1;
         return node;
     }
 
     public void removeMax() {
         root = removeMax(root);
-        size--;
     }
 
     private TreeNode removeMax(@NotNull TreeNode node) {
         if (node.right == null) { // 找到最大节点
             TreeNode leftNode = node.left; // 注意不要直接返回null，因为可能存在左子树
             node.left = null;
-            size--;
             return leftNode;
         }
         node.right = removeMax(node.right);
+        // 维护每个Node的size
+        node.size = size(node.left) + size(node.right) + 1;
         return node;
     }
 
@@ -106,28 +183,18 @@ public class MyTreeMap<K extends Comparable<K>, V> {
     }
 
     private TreeNode remove(TreeNode node, K key) {
-        if (node == null) return null;
-
+        Objects.requireNonNull(node);
         int cmp = key.compareTo(node.key);
         if (cmp < 0) { // key < node.key
             node.left = remove(node.left, key);
-            return node;
         } else if (cmp > 0) { // key > node.key
             node.right = remove(node.right, key);
-            return node;
         } else { // key == node.key
             // 被删除节点仅一侧存在子树，则删除后直接返回子树做嫁接即可
-            if (node.left == null) {
-                // 叶子结点（left right都为null）也可以合并到这一处理方式中，不需要单独处理
-                TreeNode rightNode = node.right;
-                node.right = null;
-                size--;
-                return rightNode;
+            if (node.left == null) { // 叶子结点（left right都为null）也可以合并到这一处理方式中，不需要单独处理
+                return node.right;
             } else if (node.right == null) {
-                TreeNode leftNode = node.left;
-                node.left = null;
-                size--;
-                return leftNode;
+                return node.left;
             }
             /*
                  被删除节点左右子树均不为空的情况
@@ -137,8 +204,7 @@ public class MyTreeMap<K extends Comparable<K>, V> {
             TreeNode successor = minNode(node.right); // 找到右子树的最小节点作为后继节点
             successor.right = removeMin(node.right); // 删除右子树的最小节点，即清理掉后继节点，然后将该子树嫁接到后继节点的右子树上
             successor.left = node.left; // 将左子树嫁接到后继节点的左子树上
-            node.left = node.right = null; // 删除node
-            return successor; // 返回后继节点
+            node = successor; // 将后继节点替换被删除节点
 
 /*
             比起操作Node的引用做子树嫁接操作，我们也可以直接操作Node的值，例如：
@@ -156,9 +222,10 @@ public class MyTreeMap<K extends Comparable<K>, V> {
             但在其他的一些语言中，进行数据搬移的代价可能会比处理引用/指针的更高
             在value结构很复杂的情况下，使用第二种方法可能效率会降低
 */
-
-
         }
+        // 维护每个Node的size
+        node.size = size(node.left) + size(node.right) + 1;
+        return node;
     }
 
     //endregion
@@ -346,12 +413,24 @@ public class MyTreeMap<K extends Comparable<K>, V> {
     }
 
     public int size() {
-        return size;
+        return size(root);
+    }
+
+    /**
+     * 返回以node为根的二分搜索树的节点个数
+     *
+     * @param node 二分搜索树的根
+     * @return 以node为根的二分搜索树的节点个数
+     */
+    private int size(TreeNode node) {
+        if (node == null) {
+            return 0;
+        }
+        return node.size;
     }
 
     public boolean isEmpty() {
-
-        return size == 0;
+        return size() == 0;
     }
 
     /**
