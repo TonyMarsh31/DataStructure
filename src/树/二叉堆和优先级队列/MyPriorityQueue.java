@@ -1,4 +1,4 @@
-package BST.二叉堆和优先级队列;
+package 树.二叉堆和优先级队列;
 
 public class MyPriorityQueue<T extends Comparable<T>> {
 /*
