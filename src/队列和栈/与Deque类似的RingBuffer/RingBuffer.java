@@ -1,4 +1,4 @@
-package 与Deque类似的RingBuffer;
+package 队列和栈.与Deque类似的RingBuffer;
 
 public class RingBuffer {
     private static final int INIT_CAP = 1024;

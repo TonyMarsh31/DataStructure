@@ -1,4 +1,6 @@
-package 队列和栈;
+package 队列和栈.Queue;
+
+import 队列和栈.MyArrayDeque;
 
 public class QueueTest {
     public static void main(String[] args) {

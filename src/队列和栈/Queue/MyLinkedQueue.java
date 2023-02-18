@@ -1,4 +1,4 @@
-package 队列和栈;
+package 队列和栈.Queue;
 
 import 数组和链表.MyLinkedList;
 
