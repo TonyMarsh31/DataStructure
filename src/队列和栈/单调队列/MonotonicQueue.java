@@ -30,7 +30,7 @@ public class MonotonicQueue<T extends Comparable<T>> {
         data.addLast(n);
     }
 
-    public T pop(T n) {
+    public T pop() {
         T t = data.removeFirst();
         if (!max.isEmpty() && max.getFirst().compareTo(t) == 0) {
             max.removeFirst();
