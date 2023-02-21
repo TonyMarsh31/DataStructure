@@ -7,7 +7,7 @@ package 队列和栈;
  * @param <E>
  */
 public class MyArrayDeque<E> {
-    private final static int INIT_CAP = 1;
+    private final static int INIT_CAP = 10;
     private int size;
     private E[] data;
     private int first, last;
@@ -32,7 +32,7 @@ public class MyArrayDeque<E> {
      * @param e
      */
     public void addLast(E e) {
-        if (size == data.length) resize(size * 2); // 扩容
+        ensureCapacity();
         data[last] = e;
         last++;
         if (last == data.length) last = 0; // 循环队列
@@ -53,9 +53,7 @@ public class MyArrayDeque<E> {
         size--;
 
         // 缩容
-        if (size == data.length / 4 && data.length / 2 != 0) {
-            resize(data.length / 2);
-        }
+        shrinkIfNecessary();
         return toDel;
     }
 
@@ -78,7 +76,7 @@ public class MyArrayDeque<E> {
      * @param e
      */
     public void addFirst(E e) {
-        if (size == data.length) resize(size * 2); // 扩容
+        ensureCapacity();
         // first 是elementIndex，即这个位置上已经有元素了，所以要添加的话先更新first，再赋值
         if (first == 0) first = data.length - 1; // 往左没位置了，将头指向最后一个位置
         else first--;
@@ -100,10 +98,7 @@ public class MyArrayDeque<E> {
         data[last] = null;
         size--;
 
-        // 缩容
-        if (size == data.length / 4 && data.length / 2 != 0) {
-            resize(data.length / 2);
-        }
+        shrinkIfNecessary();
         return toDel;
     }
 
@@ -124,6 +119,17 @@ public class MyArrayDeque<E> {
 
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    private void ensureCapacity() {
+        if (size == data.length) resize(size * 2); // 扩容
+    }
+
+    private void shrinkIfNecessary() {
+        // 缩容
+        if (size == data.length / 4 && data.length / 2 != 0) {
+            resize(data.length / 2);
+        }
     }
 
     private void resize(int newCap) {
