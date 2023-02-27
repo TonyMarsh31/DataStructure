@@ -38,6 +38,8 @@ public class MyLinkedHashMap<K, V> {
     private final Node<K, V> head, tail; //链表头尾节点
     private final HashMap<K, Node<K, V>> map = new HashMap<>(); //底部的HashMap
 
+    private int size;
+
     /**
      * 构造函数中初始化链表
      */
@@ -71,6 +73,7 @@ public class MyLinkedHashMap<K, V> {
             addLastNode(node);
             // 保存到map中
             map.put(key, node);
+            size++;
             return null;
         }
     }
@@ -80,10 +83,26 @@ public class MyLinkedHashMap<K, V> {
         if (map.containsKey(key)) {
             Node<K, V> node = map.remove(key); // 从map中删除
             removeNode(node); // 从链表中删除
+            size--;
             return node.val;
         } else {
             return null;
         }
+    }
+
+    public V removeFirst() {
+        if (head.next == tail) {
+            return null;
+        }
+        Node<K, V> node = head.next;
+        removeNode(node);
+        map.remove(node.key);
+        size--;
+        return node.val;
+    }
+
+    public int size() {
+        return size;
     }
 
     public boolean containsKey(K key) {
