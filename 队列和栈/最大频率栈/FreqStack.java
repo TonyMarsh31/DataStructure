@@ -1,4 +1,4 @@
-package 队列和栈.最大栈;
+package 队列和栈.最大频率栈;
 
 import java.util.HashMap;
 import java.util.Stack;
