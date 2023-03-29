@@ -96,6 +96,9 @@ public class MyLinkedList2<E> {
         // second变量可以内联，这里写出来是为了方便理解
         Node<E> second = first.next;
         head.next = second;
+
+        // 获取第一个值后，删除操作本身的代码可以全部内联为  head.next = head.next.nest ;
+
         size--;
         return first.val;
     }
