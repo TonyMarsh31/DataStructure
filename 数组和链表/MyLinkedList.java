@@ -73,18 +73,18 @@ public class MyLinkedList<E> implements Iterable<E> {
         }
 
         // 找到 index 对应的 Node
-        Node<E> p = getNode(index);
-        Node<E> temp = p.prev;
+        Node<E> e = getNode(index);
+        Node<E> pre = e.prev;
         // temp <-> p
 
         // 新要插入的 Node
-        Node<E> x = new Node<>(element);
+        Node<E> eNew = new Node<>(element);
 
-        p.prev = x;
-        temp.next = x;
+        e.prev = eNew;
+        pre.next = eNew;
 
-        x.prev = temp;
-        x.next = p;
+        eNew.prev = pre;
+        eNew.next = e;
 
         // temp <-> x <-> p
 
