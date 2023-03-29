@@ -1,4 +1,4 @@
-package 队列和栈.单调队列;
+package 队列和栈.队列拓展.单调队列;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

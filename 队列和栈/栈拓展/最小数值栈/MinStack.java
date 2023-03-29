@@ -1,4 +1,4 @@
-package 队列和栈.最小数值栈;
+package 队列和栈.栈拓展.最小数值栈;
 
 import java.util.Stack;
 

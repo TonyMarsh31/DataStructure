@@ -1,4 +1,4 @@
-package 队列和栈.Queue;
+package 队列和栈.基本实现.Queue;
 
 public class MyArrayQueue<T> {
     private T[] array;

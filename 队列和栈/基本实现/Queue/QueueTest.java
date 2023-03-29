@@ -1,6 +1,6 @@
-package 队列和栈.Queue;
+package 队列和栈.基本实现.Queue;
 
-import 队列和栈.MyArrayDeque;
+import 队列和栈.队列拓展.双端队列.MyArrayDeque;
 
 public class QueueTest {
     public static void main(String[] args) {

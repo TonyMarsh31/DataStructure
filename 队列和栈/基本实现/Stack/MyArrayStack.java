@@ -1,4 +1,4 @@
-package 队列和栈.Stack;
+package 队列和栈.基本实现.Stack;
 
 import 数组和链表.MyArrayList;
 

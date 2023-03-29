@@ -1,4 +1,4 @@
-package 队列和栈.Stack;
+package 队列和栈.基本实现.Stack;
 
 public class StackTest {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package 队列和栈.循环队列;
+package 队列和栈.队列拓展.循环队列;
 
 
 import java.util.LinkedList;
