@@ -31,7 +31,7 @@ public class MinStack<T extends Comparable<T>> {
     public void pushImproved(T val) {
         data.push(val);
         // 同步minStk中的数据
-        if (minStk.isEmpty() || (int) val <= (int) minStk.peek()) {
+        if (minStk.isEmpty() || val.compareTo(minStk.peek()) <= 0) {
             minStk.push(val);
         } //优化版本中 ，不存储重复元素
     }
